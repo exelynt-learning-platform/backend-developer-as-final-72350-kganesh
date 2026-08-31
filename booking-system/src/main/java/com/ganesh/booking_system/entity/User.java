@@ -2,8 +2,9 @@ package com.ganesh.booking_system.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
+import com.ganesh.booking_system.enums.Role;
 
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
@@ -37,7 +38,6 @@ public class User {
         this.password = password;
         this.role = role;
     }
-
 
     @PrePersist
     protected void onCreate() {

@@ -1,4 +1,4 @@
-package com.ganesh.booking_system.entity;
+package com.ganesh.booking_system.enums;
 
 public enum Role {
     ADMIN,

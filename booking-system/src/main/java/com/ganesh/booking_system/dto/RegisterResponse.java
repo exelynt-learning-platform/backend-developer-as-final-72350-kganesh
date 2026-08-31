@@ -1,6 +1,6 @@
 package com.ganesh.booking_system.dto;
 
-import com.ganesh.booking_system.entity.Role;
+import com.ganesh.booking_system.enums.Role;
 
 public class RegisterResponse {
 

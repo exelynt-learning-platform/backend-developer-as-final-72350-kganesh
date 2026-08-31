@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.ganesh.booking_system.dto.RegisterRequest;
 import com.ganesh.booking_system.entity.User;
-import com.ganesh.booking_system.entity.Role;
+import com.ganesh.booking_system.enums.Role;
 import com.ganesh.booking_system.repository.UserRepository;
 import com.ganesh.booking_system.service.UserService;
 

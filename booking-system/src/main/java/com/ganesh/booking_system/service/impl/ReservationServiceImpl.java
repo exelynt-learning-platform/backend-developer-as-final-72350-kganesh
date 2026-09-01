@@ -6,6 +6,10 @@ import com.ganesh.booking_system.entity.Reservation;
 import com.ganesh.booking_system.entity.Resource;
 import com.ganesh.booking_system.entity.User;
 import com.ganesh.booking_system.enums.ReservationStatus;
+import com.ganesh.booking_system.exception.ReservationConflictException;
+import com.ganesh.booking_system.exception.ReservationNotFoundException;
+import com.ganesh.booking_system.exception.ResourceNotFoundException;
+import com.ganesh.booking_system.exception.UnauthorizedException;
 import com.ganesh.booking_system.repository.ReservationRepository;
 import com.ganesh.booking_system.repository.ResourceRepository;
 import com.ganesh.booking_system.repository.UserRepository;
@@ -48,7 +52,6 @@ public class ReservationServiceImpl implements ReservationService {
     public ReservationResponse createReservation(
             ReservationRequest request) {
 
-        // Get currently authenticated user
         Authentication authentication =
                 SecurityContextHolder
                         .getContext()
@@ -56,20 +59,16 @@ public class ReservationServiceImpl implements ReservationService {
 
         String username = authentication.getName();
 
-        // Find logged-in user
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "User not found"
-                        )
+                        new RuntimeException("User not found")
                 );
 
-        // Find resource
         Resource resource =
                 resourceRepository.findById(
                         request.getResourceId()
                 ).orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Resource not found with id: "
                                         + request.getResourceId()
                         )
@@ -111,7 +110,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         if (conflict) {
 
-            throw new RuntimeException(
+            throw new ReservationConflictException(
                     "Resource is already reserved for the selected time"
             );
         }
@@ -131,7 +130,7 @@ public class ReservationServiceImpl implements ReservationService {
                 request.getEndTime()
         );
 
-        // Reservation price = resource price
+        // Price is taken from resource
         reservation.setPrice(
                 resource.getPrice()
         );
@@ -141,7 +140,6 @@ public class ReservationServiceImpl implements ReservationService {
                 ReservationStatus.PENDING
         );
 
-        // Save
         Reservation savedReservation =
                 reservationRepository.save(
                         reservation
@@ -195,7 +193,7 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation =
                 reservationRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ReservationNotFoundException(
                                         "Reservation not found with id: "
                                                 + id
                                 )
@@ -224,7 +222,7 @@ public class ReservationServiceImpl implements ReservationService {
                         .getUsername()
                         .equals(username)) {
 
-            throw new RuntimeException(
+            throw new UnauthorizedException(
                     "You are not authorized to view this reservation"
             );
         }
@@ -240,30 +238,30 @@ public class ReservationServiceImpl implements ReservationService {
     // FILTER + PAGINATION + SORTING
     // =========================================================
 
-
-        @Override
-        public Page<ReservationResponse> getAllReservations(
-                String status,
-                BigDecimal minPrice,
-                BigDecimal maxPrice,
-                Pageable pageable) {
+    @Override
+    public Page<ReservationResponse> getAllReservations(
+            String status,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Pageable pageable) {
 
         ReservationStatus reservationStatus = null;
 
         if (status != null && !status.isBlank()) {
 
-                try {
+            try {
+
                 reservationStatus =
                         ReservationStatus.valueOf(
                                 status.toUpperCase()
                         );
 
-                } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
 
                 throw new RuntimeException(
                         "Invalid reservation status: " + status
                 );
-                }
+            }
         }
 
         Specification<Reservation> specification =
@@ -293,12 +291,12 @@ public class ReservationServiceImpl implements ReservationService {
         return reservations.map(
                 this::mapToResponse
         );
-        }
-
+    }
 
 
     // =========================================================
     // UPDATE RESERVATION STATUS
+    // ADMIN ONLY
     // =========================================================
 
     @Override
@@ -309,7 +307,7 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation =
                 reservationRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ReservationNotFoundException(
                                         "Reservation not found with id: "
                                                 + id
                                 )
@@ -358,7 +356,7 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation =
                 reservationRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ReservationNotFoundException(
                                         "Reservation not found with id: "
                                                 + id
                                 )
@@ -377,7 +375,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .getUsername()
                 .equals(username)) {
 
-            throw new RuntimeException(
+            throw new UnauthorizedException(
                     "You are not authorized to cancel this reservation"
             );
         }

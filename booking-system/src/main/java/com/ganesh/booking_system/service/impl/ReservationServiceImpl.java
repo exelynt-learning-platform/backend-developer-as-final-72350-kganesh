@@ -15,7 +15,7 @@ import com.ganesh.booking_system.repository.ResourceRepository;
 import com.ganesh.booking_system.repository.UserRepository;
 import com.ganesh.booking_system.service.ReservationService;
 import com.ganesh.booking_system.specification.ReservationSpecification;
-
+import com.ganesh.booking_system.exception.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -61,7 +61,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found")
+                        new BadRequestException("User not found")
                 );
 
         Resource resource =
@@ -77,7 +77,7 @@ public class ReservationServiceImpl implements ReservationService {
         // Check resource availability
         if (!resource.getAvailable()) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Resource is currently unavailable"
             );
         }
@@ -86,7 +86,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (!request.getStartTime()
                 .isBefore(request.getEndTime())) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Start time must be before end time"
             );
         }
@@ -169,7 +169,7 @@ public class ReservationServiceImpl implements ReservationService {
         User user =
                 userRepository.findByUsername(username)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new BadRequestException(
                                         "User not found"
                                 )
                         );
@@ -245,6 +245,32 @@ public class ReservationServiceImpl implements ReservationService {
             BigDecimal maxPrice,
             Pageable pageable) {
 
+        // Validate price range
+        if (minPrice != null &&
+                minPrice.compareTo(BigDecimal.ZERO) < 0) {
+
+        throw new BadRequestException(
+                "minPrice cannot be negative"
+        );
+        }
+
+        if (maxPrice != null &&
+                maxPrice.compareTo(BigDecimal.ZERO) < 0) {
+
+        throw new BadRequestException(
+                "maxPrice cannot be negative"
+        );
+        }
+
+        if (minPrice != null &&
+                maxPrice != null &&
+                minPrice.compareTo(maxPrice) > 0) {
+
+        throw new BadRequestException(
+                "minPrice cannot be greater than maxPrice"
+        );
+        }
+
         ReservationStatus reservationStatus = null;
 
         if (status != null && !status.isBlank()) {
@@ -258,7 +284,7 @@ public class ReservationServiceImpl implements ReservationService {
 
             } catch (IllegalArgumentException e) {
 
-                throw new RuntimeException(
+                throw new BadRequestException(
                         "Invalid reservation status: " + status
                 );
             }
@@ -315,6 +341,11 @@ public class ReservationServiceImpl implements ReservationService {
 
         ReservationStatus reservationStatus;
 
+        if (status == null || status.isBlank()) {
+                throw new BadRequestException(
+                        "Reservation status is required"
+                );
+        }
         try {
 
             reservationStatus =
@@ -324,7 +355,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         } catch (IllegalArgumentException e) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Invalid reservation status: "
                             + status
             );

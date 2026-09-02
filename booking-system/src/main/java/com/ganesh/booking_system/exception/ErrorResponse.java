@@ -1,12 +1,14 @@
 package com.ganesh.booking_system.exception;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class ErrorResponse {
 
     private int status;
     private String message;
     private LocalDateTime timestamp;
+    private Map<String, String> errors;
 
     public ErrorResponse() {
     }
@@ -43,5 +45,13 @@ public class ErrorResponse {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Map<String, String> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(Map<String, String> errors) {
+        this.errors = errors;
     }
 }

@@ -5,6 +5,7 @@ import com.ganesh.booking_system.dto.ResourceResponse;
 import com.ganesh.booking_system.entity.Resource;
 import com.ganesh.booking_system.repository.ResourceRepository;
 import com.ganesh.booking_system.service.ResourceService;
+import com.ganesh.booking_system.exception.ResourceNotFoundException;
 
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource resource = resourceRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Resource not found with id: " + id
                         )
                 );
@@ -63,7 +64,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource existingResource = resourceRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Resource not found with id: " + id
                         )
                 );
@@ -84,7 +85,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource existingResource = resourceRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new ResourceNotFoundException(
                                 "Resource not found with id: " + id
                         )
                 );

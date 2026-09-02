@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
@@ -13,13 +14,17 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-    private final String secretKey =
-            "my-super-secret-key-for-booking-system-123456789";
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private final long expirationTime = 1000 * 60 * 60; // 1 hour
+    @Value("${jwt.expiration}")
+    private long expirationTime;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+
+        return Keys.hmacShaKeyFor(
+                secretKey.getBytes()
+        );
     }
 
     public String generateToken(String username) {
@@ -27,14 +32,20 @@ public class JwtService {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .expiration(
+                        new Date(
+                                System.currentTimeMillis()
+                                        + expirationTime
+                        )
+                )
                 .signWith(getSigningKey())
                 .compact();
     }
 
     public String extractUsername(String token) {
 
-        return extractAllClaims(token).getSubject();
+        return extractAllClaims(token)
+                .getSubject();
     }
 
     private Claims extractAllClaims(String token) {
@@ -46,9 +57,12 @@ public class JwtService {
                 .getPayload();
     }
 
-    public boolean isTokenValid(String token, String username) {
+    public boolean isTokenValid(
+            String token,
+            String username) {
 
-        String extractedUsername = extractUsername(token);
+        String extractedUsername =
+                extractUsername(token);
 
         return extractedUsername.equals(username)
                 && !isTokenExpired(token);

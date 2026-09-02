@@ -2,9 +2,10 @@ package com.ganesh.booking_system.dto;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
-
+import com.ganesh.booking_system.validation.ValidReservationTime;
 import java.time.LocalDateTime;
 
+@ValidReservationTime
 public class ReservationRequest {
 
     @NotNull(message = "Resource ID is required")
